@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Smart Class Attendance Calculator</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static',
+          filename='css/style.css') }}">
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- HEADER -->
+
+        <h1 class="main-title">
+            📚 Smart Class Attendance Calculator
+        </h1>
+
+        <!-- SUMMARY CARDS -->
+
+        <div class="summary">
+
+            <div class="summary-card subjects">
+                <h3>Total Subjects</h3>
+                <h2>{{ total_subjects }}</h2>
+            </div>
+
+            <div class="summary-card classes">
+                <h3>Total Classes</h3>
+                <h2>{{ total_classes }}</h2>
+            </div>
+
+            <div class="summary-card attendance">
+                <h3>Attendance</h3>
+                <h2>{{ overall_attendance }}%</h2>
+            </div>
+
+            <div class="summary-card warnings">
+                <h3>Warnings</h3>
+                <h2>{{ warning_subjects }}</h2>
+            </div>
+
+        </div>
+
+        <!-- ADD SUBJECT -->
+
+        <div class="form-container">
+
+            <form action="/add_subject" autocomplete="off">
+
+                <input
+                    type="text"
+                    name="subject_name"
+                    placeholder="Subject Name"
+                    autocomplete="off"
+                    required>
+
+                <input
+                    type="text"
+                    name="subject_code"
+                    placeholder="Subject Code"
+                    autocomplete="off"
+                    required>
+
+                <input
+                    type="number"
+                    name="target"
+                    placeholder="Target %"
+                    autocomplete="off"
+                    required>
+
+                <button type="submit">
+                    Add Subject
+                </button>
+
+            </form>
+
+        </div>
+        <!-- SEARCH BAR -->
+
+<div class="search-container">
+
+    <input
+        type="text"
+        id="searchInput"
+        placeholder="🔍 Search Subject..."
+        onkeyup="searchSubject()">
+
+</div>
+<!-- FILTER BUTTONS -->
+
+<div class="filter-buttons">
+
+    <button onclick="filterSubjects('ALL')">
+        All
+    </button>
+
+    <button onclick="filterSubjects('SAFE')">
+        SAFE
+    </button>
+
+    <button onclick="filterSubjects('WARNING')">
+        WARNING
+    </button>
+
+    <button onclick="filterSubjects('NO DATA')">
+        NO DATA
+    </button>
+
+</div>
+        <!-- SUBJECT DASHBOARD -->
+
+        <div class="dashboard">
+
+            {% for subject in subjects %}
+
+            <div class="card"
+     data-status="{{ subject.status }}">
+
+                <!-- SUBJECT NAME -->
+
+                <h2 class="subject-title">
+                    {{ subject.name }}
+                </h2>
+
+                <!-- TARGET -->
+
+                <p>
+                    <b>Target:</b>
+                    {{ subject.target }}%
+                </p>
+
+                <!-- TOTAL -->
+
+                <p>
+                    <b>Total Classes:</b>
+                    {{ subject.total }}
+                </p>
+
+                <!-- ATTENDED -->
+
+                <p>
+                    <b>Attended Classes:</b>
+                    {{ subject.attended }}
+                </p>
+
+                <!-- ATTENDANCE -->
+
+                <p>
+                    <b>Attendance:</b>
+                    {{ subject.percentage }}%
+                </p>
+
+                <!-- PROGRESS BAR -->
+
+                <div class="progress">
+
+                    <div
+                        class="progress-fill"
+                        style="width:{{ subject.percentage }}%;">
+
+                    </div>
+
+                </div>
+
+    <!-- SAFE BUNKS -->
+
+<p class="safe-bunk">
+
+    <b>Safe Bunks:</b>
+
+    {{ subject.safe_bunks }}
+
+</p>
+
+<!-- REQUIRED CLASSES -->
+
+<p>
+
+    <b>Need To Attend:</b>
+
+    {% if subject.required_classes == 0 %}
+
+        Target Achieved ✅
+
+    {% else %}
+
+        {{ subject.required_classes }}
+        classes more
+
+    {% endif %}
+
+</p>
+
+                <!-- STATUS -->
+
+                {% if subject.status == "WARNING" %}
+
+                    <p class="warning">
+                        WARNING
+                    </p>
+
+                {% elif subject.status == "NO DATA" %}
+
+                    <p class="nodata">
+                        NO DATA
+                    </p>
+
+                {% else %}
+
+                    <p class="safe">
+                        SAFE
+                    </p>
+
+                {% endif %}
+
+                <!-- PRESENT / ABSENT -->
+
+                <div class="buttons">
+
+                    <a href="/add_attendance?subject_id={{ subject.id }}&status=Present">
+
+                        <button class="present">
+                            Present
+                        </button>
+
+                    </a>
+
+                    <a href="/add_attendance?subject_id={{ subject.id }}&status=Absent">
+
+                        <button class="absent">
+                            Absent
+                        </button>
+
+                    </a>
+
+                </div>
+
+                <br>
+
+                <!-- EDIT SUBJECT -->
+
+                <div class="edit-section">
+
+                    <a href="/edit_subject/{{ subject.id }}">
+
+                        <button class="edit">
+                            Edit Subject
+                        </button>
+
+                    </a>
+
+                </div>
+
+                <br>
+
+                <!-- DELETE SUBJECT -->
+
+                <div class="delete-section">
+
+                    <a href="/delete_subject/{{ subject.id }}">
+
+                        <button class="delete">
+                            Delete Subject
+                        </button>
+
+                    </a>
+
+                </div>
+
+                <br>
+
+                <!-- VIEW ATTENDANCE -->
+
+                <div class="history-section">
+
+                    <a href="/attendance_history/{{ subject.id }}">
+
+                        <button class="history">
+                            View Attendance
+                        </button>
+
+                    </a>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        <!-- RECENT ATTENDANCE -->
+
+        <div class="recent-container">
+
+            <h2>
+                Recent Attendance
+            </h2>
+
+            <table class="recent-table">
+
+                <tr>
+                    <th>Date</th>
+                    <th>Subject</th>
+                    <th>Status</th>
+                </tr>
+
+                {% for row in recent_attendance %}
+
+                <tr>
+
+                    <td>
+                        {{ row[1] }}
+                    </td>
+
+                    <td>
+                        {{ row[0] }}
+                    </td>
+
+                    <td>
+
+                        {% if row[2] == "Present" %}
+
+                            <span class="present-text">
+                                Present
+                            </span>
+
+                        {% else %}
+
+                            <span class="absent-text">
+                                Absent
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </table>
+
+        </div>
+
+    </div>
+<script>
+
+function searchSubject(){
+
+    let input =
+        document
+        .getElementById("searchInput")
+        .value
+        .toLowerCase();
+
+    let cards =
+        document
+        .querySelectorAll(".card");
+
+    cards.forEach(card => {
+
+        let subject =
+            card
+            .querySelector(".subject-title")
+            .innerText
+            .toLowerCase();
+
+        if(subject.includes(input)){
+
+            card.style.display = "";
+
+        }
+        else{
+
+            card.style.display = "none";
+
+        }
+
+    });
+
+}
+
+</script>
+<script>
+
+function searchSubject(){
+
+    let input =
+        document
+        .getElementById("searchInput")
+        .value
+        .toLowerCase();
+
+    let cards =
+        document
+        .querySelectorAll(".card");
+
+    cards.forEach(card => {
+
+        let subject =
+            card
+            .querySelector(".subject-title")
+            .innerText
+            .toLowerCase();
+
+        if(subject.includes(input)){
+
+            card.style.display = "";
+
+        }
+        else{
+
+            card.style.display = "none";
+
+        }
+
+    });
+
+}
+
+
+function filterSubjects(status){
+
+    let cards =
+        document
+        .querySelectorAll(".card");
+
+    cards.forEach(card => {
+
+        let cardStatus =
+            card.getAttribute(
+                "data-status"
+            );
+
+        if(status === "ALL"){
+
+            card.style.display = "";
+
+        }
+
+        else if(cardStatus === status){
+
+            card.style.display = "";
+
+        }
+
+        else{
+
+            card.style.display = "none";
+
+        }
+
+    });
+
+}
+
+</script>
+</body>
+
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>
+        Attendance History
+    </title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static',
+          filename='css/style.css') }}">
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- HEADER -->
+
+        <h1>
+            📅 {{ subject_name }} Attendance History
+        </h1>
+
+        <!-- SUMMARY -->
+
+        <div class="summary">
+
+            <div class="summary-card subjects">
+
+                <h3>
+                    Target
+                </h3>
+
+                <h2>
+                    {{ target }}%
+                </h2>
+
+            </div>
+
+            <div class="summary-card classes">
+
+                <h3>
+                    Total Classes
+                </h3>
+
+                <h2>
+                    {{ total_classes }}
+                </h2>
+
+            </div>
+
+            <div class="summary-card attendance">
+
+                <h3>
+                    Attendance
+                </h3>
+
+                <h2>
+                    {{ percentage }}%
+                </h2>
+
+            </div>
+
+            <div class="summary-card warnings">
+
+                <h3>
+                    Absent
+                </h3>
+
+                <h2>
+                    {{ absent_classes }}
+                </h2>
+
+            </div>
+
+        </div>
+
+        <!-- PRESENT ABSENT STATS -->
+
+        <div class="summary">
+
+            <div class="summary-card">
+
+                <h3>
+                    Present
+                </h3>
+
+                <h2>
+                    {{ present_classes }}
+                </h2>
+
+            </div>
+
+            <div class="summary-card">
+
+                <h3>
+                    Absent
+                </h3>
+
+                <h2>
+                    {{ absent_classes }}
+                </h2>
+
+            </div>
+
+        </div>
+        <!-- PROGRESS ANALYTICS -->
+
+<div class="summary">
+
+    <div class="summary-card">
+
+        <h3>
+            Progress Analytics
+        </h3>
+
+        {% if trend == "Excellent" %}
+
+            <h2 style="color:green;">
+                🚀 Excellent
+            </h2>
+
+            <p>
+                Attendance target se kaafi upar hai.
+            </p>
+
+        {% elif trend == "Improving" %}
+
+            <h2 style="color:#2563eb;">
+                📈 Improving
+            </h2>
+
+            <p>
+                Attendance target ke kareeb hai.
+            </p>
+
+        {% elif trend == "Average" %}
+
+            <h2 style="color:orange;">
+                ⚠ Average
+            </h2>
+
+            <p>
+                Attendance improve karne ki zarurat hai.
+            </p>
+
+        {% else %}
+
+            <h2 style="color:red;">
+                🔴 Critical
+            </h2>
+
+            <p>
+                Attendance bahut low hai.
+            </p>
+
+        {% endif %}
+
+    </div>
+
+</div>
+        <!-- HISTORY TABLE -->
+
+        <table class="history-table">
+
+            <tr>
+
+                <th>
+                    Date
+                </th>
+
+                <th>
+                    Status
+                </th>
+
+                <th>
+                    Action
+                </th>
+
+            </tr>
+
+            {% for row in history %}
+
+            <tr>
+
+                <!-- DATE -->
+
+                <td>
+
+                    {{ row[1] }}
+
+                </td>
+
+                <!-- STATUS -->
+
+                <td>
+
+                    {% if row[2] == "Present" %}
+
+                        <span class="safe">
+
+                            ✅ Present
+
+                        </span>
+
+                    {% else %}
+
+                        <span class="warning">
+
+                            ❌ Absent
+
+                        </span>
+
+                    {% endif %}
+
+                </td>
+
+                <!-- ACTION -->
+
+                <td>
+
+                    <!-- EDIT -->
+
+                    <a href="/edit_attendance/{{ row[0] }}/{{ subject_id }}">
+
+                        <button class="edit">
+
+                            Edit
+
+                        </button>
+
+                    </a>
+
+                    <br><br>
+
+                    <!-- DELETE -->
+
+                    <a href="/delete_attendance/{{ row[0] }}/{{ subject_id }}">
+
+                        <button class="delete">
+
+                            Delete
+
+                        </button>
+
+                    </a>
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+        <br>
+
+        <!-- BACK -->
+
+        <a href="/frontend">
+
+            <button class="history">
+
+                Back To Dashboard
+
+            </button>
+
+        </a>
+
+    </div>
+
+</body>
+
+</html>
