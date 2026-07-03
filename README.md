@@ -219,27 +219,6 @@ pip install -r requirements.txt
 python app.py
 ```
 
-Open browser:
-
-```text
-http://127.0.0.1:5000/frontend
-```
-
----
-
-# 📸 Screenshots
-
-### Dashboard
-(Add dashboard screenshot here)
-
-### Attendance History
-(Add attendance history screenshot here)
-
-### Analytics
-(Add analytics screenshot here)
-
----
-
 # 🔮 Future Enhancements
 
 - Attendance Charts
@@ -256,4 +235,4 @@ http://127.0.0.1:5000/frontend
 
 # 👨‍💻 Author
 
-Shreyansh
+**SHREYANSH KUMAR**
