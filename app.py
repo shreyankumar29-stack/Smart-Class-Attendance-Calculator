@@ -1,15 +1,39 @@
+from models.user import load_user
+from flask_login import login_required
+from flask_login import LoginManager
+from utils.security import bcrypt
 from routes.attendance import register_attendance_routes
 from routes.analytics import register_analytics_routes
 from routes.subjects import register_subject_routes
+from routes.auth import register_auth_routes
 from flask import Flask, render_template
 from db import get_db_connection
 
 app = Flask(__name__)
 
+app.config["SECRET_KEY"] = "24e5840c13e7c782810b4862797a8fc6"
+
+bcrypt.init_app(app)
+
+login_manager = LoginManager()
+
+login_manager.init_app(app)
+
+login_manager.login_view = "login"
+
+login_manager.login_message_category = "info"
+
+
+@login_manager.user_loader
+def user_loader(user_id):
+
+    return load_user(int(user_id))
+
+
 register_subject_routes(app)
 register_attendance_routes(app)
 register_analytics_routes(app)
-
+register_auth_routes(app)
 
 @app.route("/frontend")
 def frontend():
@@ -211,11 +235,6 @@ def frontend():
         recent_attendance=recent_attendance
     )
 
-
-# Home Route
-@app.route("/")
-def home():
-    return "Smart Attendance Calculator Backend Running"
 
 
 # Test Subject Insert
