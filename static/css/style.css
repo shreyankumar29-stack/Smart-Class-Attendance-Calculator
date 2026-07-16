@@ -361,3 +361,19 @@ button:hover{
     opacity:0.9;
 
 }
+.account-img{
+    width:125px;
+    height:125px;
+
+    border-radius:50%;
+
+    object-fit:cover;
+
+    border:4px solid #4F46E5;
+
+    margin-bottom:20px;
+}
+
+.account-heading{
+    font-size:2rem;
+}
