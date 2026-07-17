@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div class="content-section">
+
+    <h1>
+        Smart Class Attendance Calculator
+    </h1>
+
+    <hr>
+
+    <p>
+        Welcome to Smart Class Attendance Calculator.
+    </p>
+
+    <p>
+        Track attendance, monitor safe bunks,
+        analyze progress and manage subjects efficiently.
+    </p>
+
+    <br>
+
+    <a href="{{ url_for('register') }}">
+        <button class="btn btn-primary">
+            Create Account
+        </button>
+    </a>
+
+    <a href="{{ url_for('login') }}">
+        <button class="btn btn-success">
+            Login
+        </button>
+    </a>
+
+</div>
+
+{% endblock content %}

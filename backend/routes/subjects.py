@@ -1,3 +1,4 @@
+from flask_login import login_required, current_user
 from flask import request, redirect
 from db import get_db_connection
 
@@ -8,6 +9,7 @@ def register_subject_routes(app):
     # ADD SUBJECT
     # =====================================
     @app.route("/add_subject")
+    @login_required
     def add_subject():
 
         subject_name = request.args.get("subject_name")
@@ -36,7 +38,8 @@ def register_subject_routes(app):
             SELECT *
             FROM subjects
             WHERE subject_code=%s
-        """, (subject_code,))
+            AND user_id=%s
+        """, (subject_code, current_user.id))
 
         existing = cur.fetchone()
 
@@ -50,13 +53,15 @@ def register_subject_routes(app):
         cur.execute("""
             INSERT INTO subjects
             (
+                user_id,
                 subject_name,
                 subject_code,
                 target_percentage
             )
-            VALUES (%s,%s,%s)
+            VALUES (%s,%s,%s,%s)
         """,
         (
+            current_user.id,
             subject_name,
             subject_code,
             target
@@ -74,6 +79,7 @@ def register_subject_routes(app):
     # DELETE SUBJECT
     # =====================================
     @app.route("/delete_subject/<int:id>")
+    @login_required
     def delete_subject(id):
 
         conn = get_db_connection()
@@ -83,7 +89,8 @@ def register_subject_routes(app):
             SELECT *
             FROM subjects
             WHERE id=%s
-        """, (id,))
+            AND user_id=%s
+        """, (id,current_user.id))
 
         subject = cur.fetchone()
 
@@ -98,7 +105,8 @@ def register_subject_routes(app):
         cur.execute("""
             DELETE FROM subjects
             WHERE id=%s
-        """, (id,))
+            AND user_id=%s
+        """, (id, current_user.id))
 
         conn.commit()
 
@@ -125,7 +133,8 @@ def register_subject_routes(app):
                 target_percentage
             FROM subjects
             WHERE id=%s
-        """, (id,))
+            AND user_id=%s
+        """, (id, current_user.id))
 
         subject = cur.fetchone()
 
@@ -205,7 +214,8 @@ def register_subject_routes(app):
             SELECT *
             FROM subjects
             WHERE id=%s
-        """, (id,))
+            AND user_id=%s
+        """, (id, current_user.id))
 
         subject = cur.fetchone()
 
@@ -222,7 +232,8 @@ def register_subject_routes(app):
             FROM subjects
             WHERE subject_code=%s
             AND id<>%s
-        """, (subject_code, id))
+            AND user_id=%s
+        """, (subject_code, id, current_user.id))
 
         duplicate = cur.fetchone()
 
@@ -240,13 +251,15 @@ def register_subject_routes(app):
                 subject_name=%s,
                 subject_code=%s,
                 target_percentage=%s
-            WHERE id=%s
+                WHERE id=%s
+                AND user_id=%s    
         """,
         (
             subject_name,
             subject_code,
             target,
-            id
+            id,
+            current_user.id
         ))
 
         conn.commit()

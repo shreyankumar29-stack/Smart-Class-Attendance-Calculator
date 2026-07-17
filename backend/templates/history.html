@@ -77,7 +77,7 @@
 
         </div>
 
-        <!-- PRESENT ABSENT STATS -->
+        <!-- PRESENT / ABSENT -->
 
         <div class="summary">
 
@@ -106,61 +106,63 @@
             </div>
 
         </div>
+
         <!-- PROGRESS ANALYTICS -->
 
-<div class="summary">
+        <div class="summary">
 
-    <div class="summary-card">
+            <div class="summary-card">
 
-        <h3>
-            Progress Analytics
-        </h3>
+                <h3>
+                    Progress Analytics
+                </h3>
 
-        {% if trend == "Excellent" %}
+                {% if trend == "Excellent" %}
 
-            <h2 style="color:green;">
-                🚀 Excellent
-            </h2>
+                    <h2 style="color:green;">
+                        🚀 Excellent
+                    </h2>
 
-            <p>
-   Attendance is significantly above the target.
+                    <p>
+                        Attendance is significantly above the target.
+                    </p>
 
-</p>
-        {% elif trend == "Improving" %}
+                {% elif trend == "Improving" %}
 
-            <h2 style="color:#2563eb;">
-                📈 Improving
-            </h2>
+                    <h2 style="color:#2563eb;">
+                        📈 Improving
+                    </h2>
 
-           <p>
-    Attendance is close to the target.
-</p>
-        {% elif trend == "Average" %}
+                    <p>
+                        Attendance is close to the target.
+                    </p>
 
-            <h2 style="color:orange;">
-                ⚠ Average
-            </h2>
+                {% elif trend == "Average" %}
 
-            
-               <p>
-    Attendance needs improvement.
-            </p>
+                    <h2 style="color:orange;">
+                        ⚠ Average
+                    </h2>
 
-        {% else %}
+                    <p>
+                        Attendance needs improvement.
+                    </p>
 
-            <h2 style="color:red;">
-                🔴 Critical
-            </h2>
+                {% else %}
 
-            <p>
-                Attendance is critically low.
-            </p>
+                    <h2 style="color:red;">
+                        🔴 Critical
+                    </h2>
 
-        {% endif %}
+                    <p>
+                        Attendance is critically low.
+                    </p>
 
-    </div>
+                {% endif %}
 
-</div>
+            </div>
+
+        </div>
+
         <!-- HISTORY TABLE -->
 
         <table class="history-table">
@@ -175,25 +177,17 @@
                     Status
                 </th>
 
-                <th>
-                    Action
-                </th>
-
             </tr>
 
             {% for row in history %}
 
             <tr>
 
-                <!-- DATE -->
-
                 <td>
 
                     {{ row[1] }}
 
                 </td>
-
-                <!-- STATUS -->
 
                 <td>
 
@@ -217,38 +211,6 @@
 
                 </td>
 
-                <!-- ACTION -->
-
-                <td>
-
-                    <!-- EDIT -->
-
-                    <a href="/edit_attendance/{{ row[0] }}/{{ subject_id }}">
-
-                        <button class="edit">
-
-                            Edit
-
-                        </button>
-
-                    </a>
-
-                    <br><br>
-
-                    <!-- DELETE -->
-
-                    <a href="/delete_attendance/{{ row[0] }}/{{ subject_id }}">
-
-                        <button class="delete">
-
-                            Delete
-
-                        </button>
-
-                    </a>
-
-                </td>
-
             </tr>
 
             {% endfor %}
@@ -257,7 +219,7 @@
 
         <br>
 
-        <!-- BACK -->
+        <!-- BACK BUTTON -->
 
         <a href="/frontend">
 

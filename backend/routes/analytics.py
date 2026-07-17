@@ -1,91 +1,216 @@
 from db import get_db_connection
+from flask_login import (
+    login_required,
+    current_user
+)
+
+
+# =====================================
+# VERIFY SUBJECT OWNER
+# =====================================
+
+def verify_subject_owner(
+    cur,
+    subject_id,
+    user_id
+):
+
+    cur.execute(
+        """
+        SELECT id
+        FROM subjects
+        WHERE id=%s
+        AND user_id=%s
+        """,
+        (
+            subject_id,
+            user_id
+        )
+    )
+
+    return cur.fetchone()
 
 
 def register_analytics_routes(app):
 
+    # ==========================
+    # TEST ROUTE
+    # ==========================
+
     @app.route("/analytics_test")
+    @login_required
     def analytics_test():
+
         return "Analytics Route Working"
 
 
     # ==========================
     # ATTENDANCE PERCENTAGE
     # ==========================
+
     @app.route("/percentage/<int:subject_id>")
+    @login_required
     def percentage(subject_id):
 
         conn = get_db_connection()
         cur = conn.cursor()
 
-        cur.execute("""
+        # -----------------------------
+        # Verify Subject Ownership
+        # -----------------------------
+
+        subject = verify_subject_owner(
+            cur,
+            subject_id,
+            current_user.id
+        )
+
+        if subject is None:
+
+            cur.close()
+            conn.close()
+
+            return "Unauthorized Access"
+
+        # -----------------------------
+        # Attendance Percentage
+        # -----------------------------
+
+        cur.execute(
+            """
             SELECT
                 COUNT(*) AS total_classes,
-                COUNT(*) FILTER (WHERE status='Present')
-                    AS attended_classes
+                COUNT(*)
+                FILTER
+                (
+                    WHERE status='Present'
+                ) AS attended_classes
             FROM attendance
             WHERE subject_id=%s
-        """, (subject_id,))
+            """,
+            (
+                subject_id,
+            )
+        )
 
         total, attended = cur.fetchone()
 
         if attended is None:
+
             attended = 0
 
         if total == 0:
+
             percentage = 0
+
         else:
-            percentage = (attended / total) * 100
+
+            percentage = (
+                attended / total
+            ) * 100
 
         cur.close()
         conn.close()
 
         return f"""
         Subject ID: {subject_id}<br>
-        Total Classes: {total}<br>
-        Attended Classes: {attended}<br>
-        Attendance Percentage: {percentage:.2f}%
+
+        Total Classes:
+        {total}<br>
+
+        Attended Classes:
+        {attended}<br>
+
+        Attendance Percentage:
+        {percentage:.2f}%
         """
-
-
-    # ==========================
+        # ==========================
     # SAFE BUNK
     # ==========================
+
     @app.route("/safe_bunk/<int:subject_id>")
+    @login_required
     def safe_bunk(subject_id):
 
         conn = get_db_connection()
         cur = conn.cursor()
 
-        cur.execute("""
+        # -----------------------------
+        # Verify Subject Ownership
+        # -----------------------------
+
+        subject = verify_subject_owner(
+            cur,
+            subject_id,
+            current_user.id
+        )
+
+        if subject is None:
+
+            cur.close()
+            conn.close()
+
+            return "Unauthorized Access"
+
+        # -----------------------------
+        # Attendance Details
+        # -----------------------------
+
+        cur.execute(
+            """
             SELECT
                 COUNT(*) AS total_classes,
-                COUNT(*) FILTER (WHERE status='Present')
-                    AS attended_classes
+                COUNT(*)
+                FILTER
+                (
+                    WHERE status='Present'
+                ) AS attended_classes
             FROM attendance
             WHERE subject_id=%s
-        """, (subject_id,))
+            """,
+            (
+                subject_id,
+            )
+        )
 
         total, attended = cur.fetchone()
 
         if attended is None:
+
             attended = 0
 
-        cur.execute("""
+        cur.execute(
+            """
             SELECT target_percentage
             FROM subjects
             WHERE id=%s
-        """, (subject_id,))
+            AND user_id=%s
+            """,
+            (
+                subject_id,
+                current_user.id
+            )
+        )
 
         target = cur.fetchone()[0]
 
         if total == 0:
+
             percentage = 0
             bunks = 0
+
         else:
-            percentage = (attended / total) * 100
-            bunks = int((attended / (target/100)) - total)
+
+            percentage = (
+                attended / total
+            ) * 100
+
+            bunks = int(
+                (attended / (target / 100)) - total
+            )
 
             if bunks < 0:
+
                 bunks = 0
 
         cur.close()
@@ -93,45 +218,95 @@ def register_analytics_routes(app):
 
         return f"""
         Subject ID: {subject_id}<br>
-        Current Attendance: {percentage:.2f}%<br>
-        Target Attendance: {target}%<br>
-        Safe Bunks Remaining: {bunks}
+
+        Current Attendance:
+        {percentage:.2f}%<br>
+
+        Target Attendance:
+        {target}%<br>
+
+        Safe Bunks Remaining:
+        {bunks}
         """
 
 
     # ==========================
     # WARNING
     # ==========================
+
     @app.route("/warning/<int:subject_id>")
+    @login_required
     def warning(subject_id):
 
         conn = get_db_connection()
         cur = conn.cursor()
 
-        cur.execute("""
+        # -----------------------------
+        # Verify Subject Ownership
+        # -----------------------------
+
+        subject = verify_subject_owner(
+            cur,
+            subject_id,
+            current_user.id
+        )
+
+        if subject is None:
+
+            cur.close()
+            conn.close()
+
+            return "Unauthorized Access"
+
+        # -----------------------------
+        # Attendance Percentage
+        # -----------------------------
+
+        cur.execute(
+            """
             SELECT
                 COUNT(*) AS total_classes,
-                COUNT(*) FILTER (WHERE status='Present')
-                    AS attended_classes
+                COUNT(*)
+                FILTER
+                (
+                    WHERE status='Present'
+                ) AS attended_classes
             FROM attendance
             WHERE subject_id=%s
-        """, (subject_id,))
+            """,
+            (
+                subject_id,
+            )
+        )
 
         total, attended = cur.fetchone()
 
         if attended is None:
+
             attended = 0
 
         if total == 0:
-            percentage = 0
-        else:
-            percentage = (attended / total) * 100
 
-        cur.execute("""
+            percentage = 0
+
+        else:
+
+            percentage = (
+                attended / total
+            ) * 100
+
+        cur.execute(
+            """
             SELECT target_percentage
             FROM subjects
             WHERE id=%s
-        """, (subject_id,))
+            AND user_id=%s
+            """,
+            (
+                subject_id,
+                current_user.id
+            )
+        )
 
         target = cur.fetchone()[0]
 
@@ -139,49 +314,98 @@ def register_analytics_routes(app):
         conn.close()
 
         if percentage < target:
+
             return f"""
             ⚠ WARNING<br><br>
-            Current Attendance: {percentage:.2f}%<br>
-            Required Attendance: {target}%<br>
-            Your attendance is below the required percentage.
+
+            Current Attendance:
+            {percentage:.2f}%<br>
+
+            Required Attendance:
+            {target}%<br>
+
+            Your attendance is below
+            the required percentage.
             """
 
         return f"""
         ✅ Attendance Safe<br><br>
-        Current Attendance: {percentage:.2f}%
+
+        Current Attendance:
+        {percentage:.2f}%
         """
-
-
-    # ==========================
+        # ==========================
     # SINGLE SUBJECT DASHBOARD
     # ==========================
+
     @app.route("/dashboard/<int:subject_id>")
+    @login_required
     def dashboard(subject_id):
 
         conn = get_db_connection()
         cur = conn.cursor()
 
-        cur.execute("""
+        # -----------------------------
+        # Verify Subject Ownership
+        # -----------------------------
+
+        subject = verify_subject_owner(
+            cur,
+            subject_id,
+            current_user.id
+        )
+
+        if subject is None:
+
+            cur.close()
+            conn.close()
+
+            return "Unauthorized Access"
+
+        # -----------------------------
+        # Subject Details
+        # -----------------------------
+
+        cur.execute(
+            """
             SELECT
                 subject_name,
                 target_percentage
             FROM subjects
             WHERE id=%s
-        """, (subject_id,))
+            AND user_id=%s
+            """,
+            (
+                subject_id,
+                current_user.id
+            )
+        )
 
         subject = cur.fetchone()
 
         subject_name = subject[0]
         target = subject[1]
 
-        cur.execute("""
+        # -----------------------------
+        # Attendance Statistics
+        # -----------------------------
+
+        cur.execute(
+            """
             SELECT
                 COUNT(*) AS total_classes,
-                COUNT(*) FILTER (WHERE status='Present')
-                    AS attended_classes
+                COUNT(*)
+                FILTER
+                (
+                    WHERE status='Present'
+                ) AS attended_classes
             FROM attendance
             WHERE subject_id=%s
-        """, (subject_id,))
+            """,
+            (
+                subject_id,
+            )
+        )
 
         total, attended = cur.fetchone()
 
@@ -189,11 +413,19 @@ def register_analytics_routes(app):
             attended = 0
 
         if total == 0:
+
             percentage = 0
             safe_bunks = 0
+
         else:
-            percentage = (attended / total) * 100
-            safe_bunks = int((attended / (target/100)) - total)
+
+            percentage = (
+                attended / total
+            ) * 100
+
+            safe_bunks = int(
+                (attended / (target / 100)) - total
+            )
 
             if safe_bunks < 0:
                 safe_bunks = 0
@@ -209,8 +441,11 @@ def register_analytics_routes(app):
         return f"""
         Subject: {subject_name}<br><br>
 
-        Total Classes: {total}<br>
-        Attended Classes: {attended}<br>
+        Total Classes:
+        {total}<br>
+
+        Attended Classes:
+        {attended}<br>
 
         Attendance Percentage:
         {percentage:.2f}%<br><br>
@@ -226,30 +461,40 @@ def register_analytics_routes(app):
     # ==========================
     # ALL SUBJECTS DASHBOARD
     # ==========================
+
     @app.route("/dashboard")
+    @login_required
     def dashboard_all():
 
         conn = get_db_connection()
         cur = conn.cursor()
 
-        cur.execute("""
+        cur.execute(
+            """
             SELECT
                 s.id,
                 s.subject_name,
                 s.target_percentage,
                 COUNT(a.id) AS total_classes,
                 COUNT(a.id)
-                    FILTER (WHERE a.status='Present')
-                    AS attended_classes
+                    FILTER
+                    (
+                        WHERE a.status='Present'
+                    ) AS attended_classes
             FROM subjects s
             LEFT JOIN attendance a
                 ON s.id = a.subject_id
+            WHERE s.user_id=%s
             GROUP BY
                 s.id,
                 s.subject_name,
                 s.target_percentage
             ORDER BY s.id
-        """)
+            """,
+            (
+                current_user.id,
+            )
+        )
 
         rows = cur.fetchall()
 
@@ -267,12 +512,18 @@ def register_analytics_routes(app):
                 attended = 0
 
             if total == 0:
+
                 percentage = 0
                 safe_bunks = 0
+
             else:
-                percentage = (attended / total) * 100
+
+                percentage = (
+                    attended / total
+                ) * 100
+
                 safe_bunks = int(
-                    (attended / (target/100)) - total
+                    (attended / (target / 100)) - total
                 )
 
                 if safe_bunks < 0:
@@ -285,44 +536,82 @@ def register_analytics_routes(app):
 
             output += f"""
             <hr>
+
             <h2>{subject_name}</h2>
 
-            Subject ID: {subject_id}<br>
-            Total Classes: {total}<br>
-            Attended Classes: {attended}<br>
-            Attendance: {percentage:.2f}%<br>
-            Safe Bunks: {safe_bunks}<br>
-            Status: {warning}<br>
+            Subject ID:
+            {subject_id}<br>
+
+            Total Classes:
+            {total}<br>
+
+            Attended Classes:
+            {attended}<br>
+
+            Attendance:
+            {percentage:.2f}%<br>
+
+            Safe Bunks:
+            {safe_bunks}<br>
+
+            Status:
+            {warning}<br>
             """
 
         cur.close()
         conn.close()
 
         return output
-    # ==========================
+        # ==========================
     # OVERALL ANALYTICS
     # ==========================
+
     @app.route("/analytics")
+    @login_required
     def analytics():
 
         conn = get_db_connection()
         cur = conn.cursor()
 
+        # -----------------------------
         # Total Subjects
-        cur.execute("""
+        # -----------------------------
+
+        cur.execute(
+            """
             SELECT COUNT(*)
             FROM subjects
-        """)
+            WHERE user_id=%s
+            """,
+            (
+                current_user.id,
+            )
+        )
+
         total_subjects = cur.fetchone()[0]
 
+        # -----------------------------
         # Total Attendance
-        cur.execute("""
+        # -----------------------------
+
+        cur.execute(
+            """
             SELECT
                 COUNT(*) AS total_classes,
                 COUNT(*)
-                    FILTER (WHERE status='Present')
-            FROM attendance
-        """)
+                    FILTER
+                    (
+                        WHERE a.status='Present'
+                    )
+            FROM attendance a
+            JOIN subjects s
+                ON a.subject_id = s.id
+            WHERE s.user_id=%s
+            """,
+            (
+                current_user.id,
+            )
+        )
 
         total_classes, attended_classes = cur.fetchone()
 
@@ -330,27 +619,42 @@ def register_analytics_routes(app):
             attended_classes = 0
 
         if total_classes == 0:
+
             overall_attendance = 0
+
         else:
+
             overall_attendance = round(
                 (attended_classes / total_classes) * 100,
                 2
             )
 
-        # Safe and Warning Subjects
-        cur.execute("""
+        # -----------------------------
+        # Safe / Warning Subjects
+        # -----------------------------
+
+        cur.execute(
+            """
             SELECT
                 s.target_percentage,
                 COUNT(a.id),
                 COUNT(a.id)
-                    FILTER (WHERE a.status='Present')
+                    FILTER
+                    (
+                        WHERE a.status='Present'
+                    )
             FROM subjects s
             LEFT JOIN attendance a
                 ON s.id = a.subject_id
+            WHERE s.user_id=%s
             GROUP BY
                 s.id,
                 s.target_percentage
-        """)
+            """,
+            (
+                current_user.id,
+            )
+        )
 
         rows = cur.fetchall()
 
@@ -367,13 +671,21 @@ def register_analytics_routes(app):
                 present = 0
 
             if total == 0:
+
                 percentage = 0
+
             else:
-                percentage = (present / total) * 100
+
+                percentage = (
+                    present / total
+                ) * 100
 
             if percentage >= target:
+
                 safe_subjects += 1
+
             else:
+
                 warning_subjects += 1
 
         cur.close()
@@ -400,16 +712,21 @@ def register_analytics_routes(app):
         Warning Subjects:
         {warning_subjects}
         """
+
+
     # ==========================
     # RECENT ATTENDANCE
     # ==========================
+
     @app.route("/recent_attendance")
+    @login_required
     def recent_attendance():
 
         conn = get_db_connection()
         cur = conn.cursor()
 
-        cur.execute("""
+        cur.execute(
+            """
             SELECT
                 s.subject_name,
                 a.attendance_date,
@@ -417,11 +734,16 @@ def register_analytics_routes(app):
             FROM attendance a
             JOIN subjects s
                 ON a.subject_id = s.id
+            WHERE s.user_id=%s
             ORDER BY
                 a.attendance_date DESC,
                 a.id DESC
             LIMIT 10
-        """)
+            """,
+            (
+                current_user.id,
+            )
+        )
 
         rows = cur.fetchall()
 
@@ -429,6 +751,7 @@ def register_analytics_routes(app):
         conn.close()
 
         if not rows:
+
             return "No attendance records found"
 
         output = "<h1>Recent Attendance</h1><br>"
@@ -447,10 +770,14 @@ def register_analytics_routes(app):
             """
 
         return output
+
+
     # ==========================
     # HEALTH CHECK
     # ==========================
+
     @app.route("/health")
+    @login_required
     def health():
 
         try:

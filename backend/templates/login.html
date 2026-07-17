@@ -1,0 +1,79 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div class="content-section">
+
+    <form method="POST" action="">
+
+        {{ form.hidden_tag() }}
+
+        <fieldset class="form-group">
+
+            <legend class="border-bottom mb-4">
+
+                Log In
+
+            </legend>
+
+            <!-- EMAIL -->
+
+            <div class="form-group">
+
+                {{ form.email.label(class="form-control-label") }}
+
+                {{ form.email(class="form-control form-control-lg") }}
+
+            </div>
+
+            <!-- PASSWORD -->
+
+            <div class="form-group mt-3">
+
+                {{ form.password.label(class="form-control-label") }}
+
+                {{ form.password(class="form-control form-control-lg") }}
+
+            </div>
+
+            <!-- REMEMBER ME -->
+
+            <div class="form-check mt-3">
+
+                {{ form.remember(class="form-check-input") }}
+
+                {{ form.remember.label(class="form-check-label") }}
+
+            </div>
+
+        </fieldset>
+
+        <!-- LOGIN BUTTON -->
+
+        <div class="form-group mt-4">
+
+            {{ form.submit(class="btn btn-outline-success") }}
+
+        </div>
+
+    </form>
+
+</div>
+
+<div class="border-top pt-3">
+
+    <small class="text-muted">
+
+        Need An Account?
+
+        <a href="{{ url_for('register') }}">
+
+            Sign Up Now
+
+        </a>
+
+    </small>
+
+</div>
+
+{% endblock content %}
