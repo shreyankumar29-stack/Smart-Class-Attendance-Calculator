@@ -1,4 +1,5 @@
 from flask import request, redirect, render_template
+from flask_login import login_required, current_user
 from db import get_db_connection
 
 
@@ -7,7 +8,9 @@ def register_attendance_routes(app):
     # =====================================
     # ADD ATTENDANCE
     # =====================================
+
     @app.route("/add_attendance")
+    @login_required
     def add_attendance():
 
         subject_id = request.args.get("subject_id")
@@ -16,11 +19,57 @@ def register_attendance_routes(app):
         conn = get_db_connection()
         cur = conn.cursor()
 
-        cur.execute("""
+        # ---------------------------------
+        # Verify Subject belongs to
+        # Logged In User
+        # ---------------------------------
+
+        cur.execute(
+            """
+            SELECT id
+            FROM subjects
+            WHERE id=%s
+            AND user_id=%s
+            """,
+            (
+                subject_id,
+                current_user.id
+            )
+        )
+
+        subject = cur.fetchone()
+
+        if subject is None:
+
+            cur.close()
+            conn.close()
+
+            return "Unauthorized Access"
+
+        # ---------------------------------
+        # Insert Attendance
+        # ---------------------------------
+
+        cur.execute(
+            """
             INSERT INTO attendance
-            (subject_id, attendance_date, status)
-            VALUES (%s, CURRENT_DATE, %s)
-        """, (subject_id, status))
+            (
+                subject_id,
+                attendance_date,
+                status
+            )
+            VALUES
+            (
+                %s,
+                CURRENT_DATE,
+                %s
+            )
+            """,
+            (
+                subject_id,
+                status
+            )
+        )
 
         conn.commit()
 
@@ -28,23 +77,59 @@ def register_attendance_routes(app):
         conn.close()
 
         return redirect("/frontend")
-
-
-    # =====================================
+        # =====================================
     # VIEW ATTENDANCE RECORDS
     # =====================================
+
     @app.route("/attendance/<int:subject_id>")
+    @login_required
     def attendance(subject_id):
 
         conn = get_db_connection()
         cur = conn.cursor()
 
-        cur.execute("""
+        # ---------------------------------
+        # Verify Subject belongs to
+        # Logged In User
+        # ---------------------------------
+
+        cur.execute(
+            """
+            SELECT id
+            FROM subjects
+            WHERE id=%s
+            AND user_id=%s
+            """,
+            (
+                subject_id,
+                current_user.id
+            )
+        )
+
+        subject = cur.fetchone()
+
+        if subject is None:
+
+            cur.close()
+            conn.close()
+
+            return "Unauthorized Access"
+
+        # ---------------------------------
+        # Fetch Attendance
+        # ---------------------------------
+
+        cur.execute(
+            """
             SELECT *
             FROM attendance
             WHERE subject_id=%s
             ORDER BY id
-        """, (subject_id,))
+            """,
+            (
+                subject_id,
+            )
+        )
 
         data = cur.fetchall()
 
@@ -57,18 +142,57 @@ def register_attendance_routes(app):
     # =====================================
     # EDIT ATTENDANCE
     # =====================================
+
     @app.route("/edit_attendance/<int:id>/<int:subject_id>")
+    @login_required
     def edit_attendance(id, subject_id):
 
         conn = get_db_connection()
         cur = conn.cursor()
 
-        cur.execute("""
-            SELECT
-                status
+        # ---------------------------------
+        # Verify Attendance belongs to
+        # Logged In User
+        # ---------------------------------
+
+        cur.execute(
+            """
+            SELECT attendance.id
+            FROM attendance
+            JOIN subjects
+            ON attendance.subject_id = subjects.id
+            WHERE attendance.id=%s
+            AND subjects.user_id=%s
+            """,
+            (
+                id,
+                current_user.id
+            )
+        )
+
+        record = cur.fetchone()
+
+        if record is None:
+
+            cur.close()
+            conn.close()
+
+            return "Unauthorized Access"
+
+        # ---------------------------------
+        # Fetch Current Status
+        # ---------------------------------
+
+        cur.execute(
+            """
+            SELECT status
             FROM attendance
             WHERE id=%s
-        """, (id,))
+            """,
+            (
+                id,
+            )
+        )
 
         attendance = cur.fetchone()
 
@@ -81,20 +205,26 @@ def register_attendance_routes(app):
 
         current_status = attendance[0]
 
-        # Toggle Present/Absent
         if current_status == "Present":
             new_status = "Absent"
         else:
             new_status = "Present"
 
-        cur.execute("""
+        # ---------------------------------
+        # Update Status
+        # ---------------------------------
+
+        cur.execute(
+            """
             UPDATE attendance
             SET status=%s
             WHERE id=%s
-        """, (
-            new_status,
-            id
-        ))
+            """,
+            (
+                new_status,
+                id
+            )
+        )
 
         conn.commit()
 
@@ -105,20 +235,59 @@ def register_attendance_routes(app):
             f"/attendance_history/{subject_id}"
         )
 
-
-    # =====================================
+        # =====================================
     # DELETE ATTENDANCE
     # =====================================
+
     @app.route("/delete_attendance/<int:id>/<int:subject_id>")
+    @login_required
     def delete_attendance(id, subject_id):
 
         conn = get_db_connection()
         cur = conn.cursor()
 
-        cur.execute("""
+        # ---------------------------------
+        # Verify Attendance belongs to
+        # Logged In User
+        # ---------------------------------
+
+        cur.execute(
+            """
+            SELECT attendance.id
+            FROM attendance
+            JOIN subjects
+                ON attendance.subject_id = subjects.id
+            WHERE attendance.id=%s
+            AND subjects.user_id=%s
+            """,
+            (
+                id,
+                current_user.id
+            )
+        )
+
+        record = cur.fetchone()
+
+        if record is None:
+
+            cur.close()
+            conn.close()
+
+            return "Unauthorized Access"
+
+        # ---------------------------------
+        # Delete Attendance
+        # ---------------------------------
+
+        cur.execute(
+            """
             DELETE FROM attendance
             WHERE id=%s
-        """, (id,))
+            """,
+            (
+                id,
+            )
+        )
 
         conn.commit()
 
@@ -133,29 +302,42 @@ def register_attendance_routes(app):
     # =====================================
     # TEST ROUTE
     # =====================================
+
     @app.route("/history_test")
+    @login_required
     def history_test():
 
         return "History Route Working"
-
-
-    # =====================================
+        # =====================================
     # ATTENDANCE HISTORY
     # =====================================
+
     @app.route("/attendance_history/<int:subject_id>")
+    @login_required
     def attendance_history(subject_id):
 
         conn = get_db_connection()
         cur = conn.cursor()
 
-        # Subject Details
-        cur.execute("""
+        # ---------------------------------
+        # Verify Subject belongs to
+        # Logged In User
+        # ---------------------------------
+
+        cur.execute(
+            """
             SELECT
                 subject_name,
                 target_percentage
             FROM subjects
             WHERE id=%s
-        """, (subject_id,))
+            AND user_id=%s
+            """,
+            (
+                subject_id,
+                current_user.id
+            )
+        )
 
         subject = cur.fetchone()
 
@@ -164,13 +346,17 @@ def register_attendance_routes(app):
             cur.close()
             conn.close()
 
-            return "Subject Not Found"
+            return "Unauthorized Access"
 
         subject_name = subject[0]
         target = subject[1]
 
+        # ---------------------------------
         # Attendance History
-        cur.execute("""
+        # ---------------------------------
+
+        cur.execute(
+            """
             SELECT
                 id,
                 attendance_date,
@@ -180,11 +366,18 @@ def register_attendance_routes(app):
             ORDER BY
                 attendance_date DESC,
                 id DESC
-        """, (subject_id,))
+            """,
+            (
+                subject_id,
+            )
+        )
 
         history = cur.fetchall()
 
+        # ---------------------------------
         # Statistics
+        # ---------------------------------
+
         total_classes = len(history)
 
         present_classes = sum(
@@ -196,15 +389,19 @@ def register_attendance_routes(app):
         absent_classes = total_classes - present_classes
 
         if total_classes == 0:
+
             percentage = 0
+
         else:
+
             percentage = round(
                 (present_classes / total_classes) * 100,
                 2
             )
-        # ==========================
-        # PROGRESS ANALYTICS
-        # ==========================
+
+        # ---------------------------------
+        # Progress Analytics
+        # ---------------------------------
 
         if percentage >= target:
 
@@ -212,7 +409,7 @@ def register_attendance_routes(app):
 
         elif percentage >= target - 10:
 
-           trend = "Improving"
+            trend = "Improving"
 
         elif percentage >= target - 20:
 
@@ -225,10 +422,12 @@ def register_attendance_routes(app):
         else:
 
             trend = "Critical"
+
         cur.close()
         conn.close()
 
         return render_template(
+
             "history.html",
 
             subject_id=subject_id,
@@ -240,5 +439,8 @@ def register_attendance_routes(app):
             total_classes=total_classes,
             present_classes=present_classes,
             absent_classes=absent_classes,
-            percentage=percentage,trend=trend
+
+            percentage=percentage,
+            trend=trend
+
         )
