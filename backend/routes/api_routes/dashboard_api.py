@@ -203,3 +203,142 @@ def register_dashboard_api(app):
             }
 
         )
+        # =====================================
+    # SUBJECT OVERVIEW API
+    # =====================================
+
+    @app.route("/api/dashboard/subjects")
+    def api_dashboard_subjects():
+
+        user_id = request.args.get(
+            "user_id",
+            type=int
+        )
+
+        if not user_id:
+
+            return jsonify({
+
+                "success": False,
+
+                "message": "User ID is required"
+
+            }), 400
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        cur.execute(
+
+            """
+            SELECT
+
+                s.subject_name,
+
+                s.target_percentage,
+
+                COUNT(a.id) AS total_classes,
+
+                COUNT(a.id)
+                FILTER
+                (
+                    WHERE a.status='Present'
+                ) AS attended_classes
+
+            FROM subjects s
+
+            LEFT JOIN attendance a
+            ON s.id=a.subject_id
+
+            WHERE s.user_id=%s
+
+            GROUP BY
+
+                s.subject_name,
+                s.target_percentage
+
+            ORDER BY
+                s.subject_name
+
+            """,
+
+            (
+                user_id,
+            )
+
+        )
+
+        rows = cur.fetchall()
+
+        subjects = []
+
+        for row in rows:
+
+            subject = row[0]
+            target = row[1]
+            total = row[2]
+            attended = row[3]
+
+            if attended is None:
+
+                attended = 0
+
+            if total == 0:
+
+                percentage = 0
+                safe_bunks = 0
+
+            else:
+
+                percentage = round(
+
+                    (
+                        attended /
+                        total
+                    ) * 100,
+
+                    2
+
+                )
+
+                safe_bunks = int(
+
+                    (
+                        attended /
+                        (target / 100)
+                    ) - total
+
+                )
+
+                if safe_bunks < 0:
+
+                    safe_bunks = 0
+
+            if percentage >= target:
+
+                status = "✅ Safe"
+
+            else:
+
+                status = "⚠ Warning"
+
+            subjects.append(
+
+                {
+
+                    "Subject": subject,
+
+                    "Attendance %": percentage,
+
+                    "Safe Bunks": safe_bunks,
+
+                    "Status": status
+
+                }
+
+            )
+
+        cur.close()
+        conn.close()
+
+        return jsonify(subjects)
