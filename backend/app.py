@@ -1,3 +1,4 @@
+from routes.api_routes import register_api_routes
 from flask import Flask, render_template
 from flask_login import (
     LoginManager,
@@ -68,6 +69,7 @@ register_attendance_routes(app)
 
 register_analytics_routes(app)
 
+register_api_routes(app)
 # =====================================
 # FRONTEND DASHBOARD
 # =====================================
