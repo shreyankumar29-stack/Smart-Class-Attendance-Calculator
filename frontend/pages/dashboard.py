@@ -132,71 +132,36 @@ else:
 
 
 # =====================================
-# SUBJECT OVERVIEW (Dummy)
+# SUBJECT OVERVIEW (LIVE)
 # =====================================
 
 st.divider()
 
 st.subheader("📚 Subject Overview")
 
-subjects = pd.DataFrame({
+response = requests.get(
 
-    "Subject": [
+    "http://127.0.0.1:5000/api/dashboard/subjects",
 
-        "DBMS",
-        "DSA",
-        "Python",
-        "Operating System",
-        "Computer Networks",
-        "Discrete Mathematics"
+    params={
 
-    ],
+        "user_id": st.session_state["user"]["id"]
 
-    "Attendance %": [
+    }
 
-        86,
-        72,
-        91,
-        78,
-        83,
-        84
+)
 
-    ],
-
-    "Safe Bunks": [
-
-        3,
-        0,
-        5,
-        1,
-        2,
-        2
-
-    ],
-
-    "Status": [
-
-        "✅ Safe",
-        "⚠ Warning",
-        "✅ Safe",
-        "✅ Safe",
-        "✅ Safe",
-        "✅ Safe"
-
-    ]
-
-})
+subjects = pd.DataFrame(response.json())
 
 st.dataframe(
 
     subjects,
 
-    use_container_width=True,
+    hide_index=True,
 
-    hide_index=True
+    use_container_width=True
 
 )
-
 
 # =====================================
 # PIE CHART (Dummy)
@@ -246,59 +211,55 @@ st.plotly_chart(
 
 )
 
-
 # =====================================
-# RECENT ACTIVITY (Dummy)
+# RECENT ACTIVITY (LIVE)
 # =====================================
 
 st.divider()
 
 st.subheader("🕒 Recent Attendance Activity")
 
-recent_activity = pd.DataFrame({
+recent = pd.DataFrame(data["recent_attendance"])
 
-    "Date": [
+if not recent.empty:
 
-        "17 Jul 2026",
-        "16 Jul 2026",
-        "15 Jul 2026",
-        "14 Jul 2026",
-        "13 Jul 2026"
+    recent.rename(
 
-    ],
+        columns={
 
-    "Subject": [
+            "subject_name": "Subject",
 
-        "DBMS",
-        "DSA",
-        "Python",
-        "Operating System",
-        "Computer Networks"
+            "date": "Date",
 
-    ],
+            "status": "Status"
 
-    "Status": [
+        },
 
-        "✅ Present",
-        "❌ Absent",
-        "✅ Present",
-        "✅ Present",
-        "❌ Absent"
+        inplace=True
 
-    ]
+    )
 
-})
+    recent["Status"] = recent["Status"].replace({
 
-st.dataframe(
+        "Present": "✅ Present",
 
-    recent_activity,
+        "Absent": "❌ Absent"
 
-    hide_index=True,
+    })
 
-    use_container_width=True
+    st.dataframe(
 
-)
+        recent,
 
+        hide_index=True,
+
+        use_container_width=True
+
+    )
+
+else:
+
+    st.info("No attendance records found.")
 
 # =====================================
 # ATTENDANCE TREND (Dummy)
