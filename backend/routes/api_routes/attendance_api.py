@@ -379,3 +379,4 @@ def register_attendance_api(app):
             "message": "Attendance Deleted Successfully"
 
         }), 200
+    
