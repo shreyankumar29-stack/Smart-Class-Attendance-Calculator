@@ -104,18 +104,17 @@ def register_dashboard_api(app):
 
                 else:
 
-                    bunks = int(
+                    if target > 0:
 
-                        (
-                            attended /
-                            (target / 100)
-                        ) - total
+                        bunks = int(
+                            (
+                                attended /
+                                (target / 100)
+                            ) - total
+                        )
 
-                    )
-
-                    if bunks > 0:
-
-                        safe_bunks += bunks
+                        if bunks > 0:
+                            safe_bunks += bunks
 
         if total_classes == 0:
 
@@ -133,6 +132,13 @@ def register_dashboard_api(app):
                 2
 
             )
+
+        # =====================================
+        # PRESENT / ABSENT COUNT
+        # =====================================
+
+        present_classes = attended_classes
+        absent_classes = total_classes - attended_classes
 
         # =====================================
         # RECENT ATTENDANCE
@@ -198,12 +204,17 @@ def register_dashboard_api(app):
 
                 "safe_bunks": safe_bunks,
 
+                "present_classes": present_classes,
+
+                "absent_classes": absent_classes,
+
                 "recent_attendance": recent_attendance
 
             }
 
         )
-        # =====================================
+
+    # =====================================
     # SUBJECT OVERVIEW API
     # =====================================
 
@@ -301,16 +312,19 @@ def register_dashboard_api(app):
 
                 )
 
-                safe_bunks = int(
+                if target > 0:
 
-                    (
-                        attended /
-                        (target / 100)
-                    ) - total
+                    safe_bunks = int(
+                        (
+                            attended /
+                            (target / 100)
+                        ) - total
+                    )
 
-                )
+                    if safe_bunks < 0:
+                        safe_bunks = 0
 
-                if safe_bunks < 0:
+                else:
 
                     safe_bunks = 0
 
@@ -342,3 +356,113 @@ def register_dashboard_api(app):
         conn.close()
 
         return jsonify(subjects)
+
+    # =====================================
+    # ATTENDANCE TREND API
+    # =====================================
+
+    @app.route("/api/dashboard/trend")
+    def api_dashboard_trend():
+
+        user_id = request.args.get(
+            "user_id",
+            type=int
+        )
+
+        if not user_id:
+
+            return jsonify({
+
+                "success": False,
+
+                "message": "User ID is required"
+
+            }), 400
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        cur.execute(
+
+            """
+            SELECT
+
+                attendance_date,
+
+                COUNT(*) AS total,
+
+                COUNT(*)
+                FILTER
+                (
+                    WHERE status='Present'
+                ) AS present
+
+            FROM attendance
+
+            WHERE subject_id IN
+            (
+
+                SELECT id
+                FROM subjects
+                WHERE user_id=%s
+
+            )
+
+            GROUP BY attendance_date
+
+            ORDER BY attendance_date
+
+            """,
+
+            (
+                user_id,
+            )
+
+        )
+
+        rows = cur.fetchall()
+
+        trend = []
+
+        for row in rows:
+
+            date = str(row[0])
+            total = row[1]
+            present = row[2]
+
+            if present is None:
+                present = 0
+
+            if total == 0:
+
+                percentage = 0
+
+            else:
+
+                percentage = round(
+
+                    (
+                        present /
+                        total
+                    ) * 100,
+
+                    2
+
+                )
+
+            trend.append(
+
+                {
+
+                    "Date": date,
+
+                    "Attendance": percentage
+
+                }
+
+            )
+
+        cur.close()
+        conn.close()
+
+        return jsonify(trend)
