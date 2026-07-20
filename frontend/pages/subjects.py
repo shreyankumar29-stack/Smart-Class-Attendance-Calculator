@@ -268,6 +268,26 @@ if st.session_state.edit_subject is not None:
             else:
 
                 st.error(data["message"])
+
+# =====================================
+# SUMMARY CALCULATIONS
+# =====================================
+
+safe_subjects = len(
+
+    subjects[
+        subjects["Status"] == "✅ Safe"
+    ]
+
+)
+
+warning_subjects = len(
+
+    subjects[
+        subjects["Status"] == "⚠️ Warning"
+    ]
+
+)
 # =====================================
 # SUMMARY
 # =====================================
@@ -292,8 +312,7 @@ with col2:
 
         "🟢 Safe Subjects",
 
-        len(subjects)
-
+        safe_subjects
     )
 
 with col3:
@@ -302,6 +321,6 @@ with col3:
 
         "⚠ Warning Subjects",
 
-        0
+        warning_subjects
 
     )
