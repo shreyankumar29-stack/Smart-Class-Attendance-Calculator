@@ -31,19 +31,48 @@ def register_subjects_api(app):
         cur = conn.cursor()
 
         cur.execute(
+
             """
             SELECT
-                id,
-                subject_name,
-                subject_code,
-                target_percentage
-            FROM subjects
-            WHERE user_id=%s
-            ORDER BY subject_name
+
+                s.id,
+
+                s.subject_name,
+
+                s.subject_code,
+
+                s.target_percentage,
+
+                COUNT(a.id) AS total_classes,
+
+                COUNT(a.id)
+                FILTER
+                (
+                    WHERE a.status='Present'
+                ) AS attended_classes
+
+            FROM subjects s
+
+            LEFT JOIN attendance a
+                ON s.id = a.subject_id
+
+            WHERE s.user_id=%s
+
+            GROUP BY
+
+                s.id,
+                s.subject_name,
+                s.subject_code,
+                s.target_percentage
+
+            ORDER BY
+                s.subject_name
             """,
+
             (
                 user_id,
             )
+
         )
 
         rows = cur.fetchall()
@@ -51,6 +80,38 @@ def register_subjects_api(app):
         subjects = []
 
         for row in rows:
+
+            total = row[4]
+            attended = row[5]
+
+            if attended is None:
+                attended = 0
+
+            if total == 0:
+
+                percentage = 0
+                status = "⚠️ Warning"
+
+            else:
+
+                percentage = round(
+
+                    (
+                        attended /
+                        total
+                    ) * 100,
+
+                    2
+
+                )
+
+                if percentage >= row[3]:
+
+                    status = "✅ Safe"
+
+                else:
+
+                    status = "⚠️ Warning"
 
             subjects.append(
 
@@ -62,7 +123,11 @@ def register_subjects_api(app):
 
                     "subject_code": row[2],
 
-                    "target_percentage": row[3]
+                    "target_percentage": row[3],
+
+                    "attendance_percentage": percentage,
+
+                    "status": status
 
                 }
 
@@ -72,7 +137,8 @@ def register_subjects_api(app):
         conn.close()
 
         return jsonify(subjects)
-        # =====================================
+
+    # =====================================
     # ADD SUBJECT API
     # =====================================
 
@@ -191,7 +257,8 @@ def register_subjects_api(app):
             "message": "Subject Added Successfully"
 
         }), 201
-        # =====================================
+
+    # =====================================
     # UPDATE SUBJECT API
     # =====================================
 
@@ -267,7 +334,8 @@ def register_subjects_api(app):
             "message": "Subject Updated Successfully"
 
         }), 200
-        # =====================================
+
+    # =====================================
     # DELETE SUBJECT API
     # =====================================
 
