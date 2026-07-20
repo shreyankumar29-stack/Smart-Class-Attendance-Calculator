@@ -116,7 +116,9 @@ subjects.rename(
 
         "subject_code": "Code",
 
-        "target_percentage": "Target"
+        "target_percentage": "Target",
+
+        "status": "Status"
 
     },
 
@@ -124,7 +126,6 @@ subjects.rename(
 
 )
 
-subjects["Status"] = "✅ Safe"
 
 
 # =====================================
