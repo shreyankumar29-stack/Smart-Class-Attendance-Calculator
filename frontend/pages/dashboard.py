@@ -164,14 +164,14 @@ st.dataframe(
 )
 
 # =====================================
-# PIE CHART (Dummy)
+# PIE CHART (LIVE)
 # =====================================
 
 st.divider()
 
 st.subheader("🥧 Attendance Distribution")
 
-chart_data = {
+chart_data = pd.DataFrame({
 
     "Status": [
 
@@ -182,12 +182,12 @@ chart_data = {
 
     "Classes": [
 
-        82,
-        18
+        data["present_classes"],
+        data["absent_classes"]
 
     ]
 
-}
+})
 
 fig = px.pie(
 
@@ -208,7 +208,6 @@ st.plotly_chart(
     fig,
 
     use_container_width=True
-
 )
 
 # =====================================
@@ -262,43 +261,39 @@ else:
     st.info("No attendance records found.")
 
 # =====================================
-# ATTENDANCE TREND (Dummy)
+# ATTENDANCE TREND (LIVE)
 # =====================================
 
 st.divider()
 
 st.subheader("📈 Attendance Trend")
 
-trend = pd.DataFrame({
+response = requests.get(
 
-    "Week": [
+    "http://127.0.0.1:5000/api/dashboard/trend",
 
-        "Week 1",
-        "Week 2",
-        "Week 3",
-        "Week 4",
-        "Week 5"
+    params={
 
-    ],
+        "user_id": st.session_state["user"]["id"]
 
-    "Attendance": [
-
-        72,
-        75,
-        79,
-        81,
-        82
-
-    ]
-
-})
-
-st.line_chart(
-
-    trend,
-
-    x="Week",
-
-    y="Attendance"
+    }
 
 )
+
+trend = pd.DataFrame(response.json())
+
+if not trend.empty:
+
+    st.line_chart(
+
+        trend,
+
+        x="Date",
+
+        y="Attendance"
+
+    )
+
+else:
+
+    st.info("No attendance trend available.")

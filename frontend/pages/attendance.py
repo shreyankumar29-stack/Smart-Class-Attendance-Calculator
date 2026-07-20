@@ -1,6 +1,16 @@
 import streamlit as st
 import pandas as pd
+import requests
+from datetime import date
+# =====================================
+# LOGIN CHECK
+# =====================================
 
+if "logged_in" not in st.session_state:
+
+    st.warning("Please login first.")
+
+    st.switch_page("pages/Login.py")
 # =====================================
 # PAGE TITLE
 # =====================================
@@ -16,24 +26,54 @@ st.divider()
 # =====================================
 
 st.subheader("➕ Mark Attendance")
+# =====================================
+# FETCH SUBJECTS
+# =====================================
+
+response = requests.get(
+
+    "http://127.0.0.1:5000/api/subjects",
+
+    params={
+
+        "user_id": st.session_state["user"]["id"]
+
+    }
+
+)
+
+subjects = response.json()
+
+subject_options = {
+
+    subject["subject_name"]: subject["id"]
+
+    for subject in subjects
+
+}
 
 with st.form("attendance_form"):
+
+    if not subject_options:
+
+        st.info("Please add at least one subject first.")
+
+        st.stop()
 
     subject = st.selectbox(
 
         "Select Subject",
 
-        [
+        list(subject_options.keys())
 
-            "Database Design",
-            "Data Structures",
-            "Python Programming",
-            "Operating System",
-            "Computer Networks",
-            "Discrete Mathematics"
+    )
 
-        ]
+    subject_id = subject_options[subject]
+    attendance_date = st.date_input(
 
+    "Attendance Date",
+
+    value=date.today()
     )
 
     status = st.radio(
@@ -59,12 +99,33 @@ with st.form("attendance_form"):
 
     if submitted:
 
-        st.success(
+        response = requests.post(
 
-            f"{subject} marked as {status}."
+            "http://127.0.0.1:5000/api/attendance",
+
+            json={
+
+                "subject_id": subject_id,
+
+                "attendance_date": str(attendance_date),
+
+                "status": status
+
+            }
 
         )
 
+        data = response.json()
+
+        if response.status_code == 201:
+
+            st.success(data["message"])
+
+            st.rerun()
+
+        else:
+
+            st.error(data["message"])
 # =====================================
 # ATTENDANCE HISTORY
 # =====================================
@@ -72,40 +133,49 @@ with st.form("attendance_form"):
 st.divider()
 
 st.subheader("📋 Attendance History")
+# =====================================
+# FETCH ATTENDANCE
+# =====================================
 
-attendance_history = pd.DataFrame({
+response = requests.get(
 
-    "Date": [
+    "http://127.0.0.1:5000/api/attendance",
 
-        "17 Jul 2026",
-        "16 Jul 2026",
-        "15 Jul 2026",
-        "14 Jul 2026",
-        "13 Jul 2026"
+    params={
 
-    ],
+        "user_id": st.session_state["user"]["id"]
 
-    "Subject": [
+    }
 
-        "Database Design",
-        "Data Structures",
-        "Python Programming",
-        "Operating System",
-        "Computer Networks"
+)
 
-    ],
+attendance_history = pd.DataFrame(response.json())
 
-    "Status": [
+if not attendance_history.empty:
 
-        "✅ Present",
-        "❌ Absent",
-        "✅ Present",
-        "✅ Present",
-        "❌ Absent"
+    attendance_history.rename(
 
-    ]
+        columns={
 
-})
+            "attendance_date": "Date",
+
+            "subject_name": "Subject",
+
+            "status": "Status"
+
+        },
+
+        inplace=True
+
+    )
+
+    attendance_history["Status"] = attendance_history["Status"].replace({
+
+        "Present": "✅ Present",
+
+        "Absent": "❌ Absent"
+
+    })
 
 # =====================================
 # FILTER
@@ -160,6 +230,43 @@ st.dataframe(
 # =====================================
 
 st.divider()
+# =====================================
+# SUMMARY CALCULATIONS
+# =====================================
+
+if attendance_history.empty:
+
+    present = 0
+    absent = 0
+    attendance_percentage = 0
+
+else:
+
+    present = len(
+
+        attendance_history[
+            attendance_history["Status"] == "✅ Present"
+        ]
+
+    )
+
+    absent = len(
+
+        attendance_history[
+            attendance_history["Status"] == "❌ Absent"
+        ]
+
+    )
+
+    total = present + absent
+
+    attendance_percentage = round(
+
+        (present / total) * 100,
+
+        2
+
+    ) if total > 0 else 0
 
 st.subheader("📊 Attendance Summary")
 
@@ -168,29 +275,19 @@ col1, col2, col3 = st.columns(3)
 with col1:
 
     st.metric(
-
-        "✅ Present",
-
-        18
-
-    )
+    "✅ Present",
+    present
+)
 
 with col2:
-
     st.metric(
-
-        "❌ Absent",
-
-        4
-
-    )
+    "❌ Absent",
+    absent
+)
 
 with col3:
 
     st.metric(
-
-        "📈 Attendance",
-
-        "81.8%"
-
-    )
+    "📈 Attendance",
+    f"{attendance_percentage}%"
+)
