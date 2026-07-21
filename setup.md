@@ -1,40 +1,24 @@
-# ⚙️ Smart Class Attendance Calculator - Setup Guide
+# 🚀 Smart Class Attendance Calculator Setup Guide
 
-This guide explains how to install and run the Smart Class Attendance Calculator project on your local machine.
-
----
-
-# 📋 Prerequisites
-
-Make sure the following software is installed:
-
-- Python 3.10 or above
-- PostgreSQL
-- Git
-- Visual Studio Code (Recommended)
+This guide explains how to run the project locally.
 
 ---
 
-# 📥 Step 1: Clone Repository
+# 1. Clone Repository
 
 ```bash
-git clone <your-github-repository-url>
+git clone https://github.com/YOUR_USERNAME/Smart-Class-Attendance-Calculator.git
+
 cd Smart-Class-Attendance-Calculator
 ```
 
 ---
 
-# 🐍 Step 2: Create Virtual Environment
-
-Open terminal in the project folder and run:
+# 2. Create Virtual Environment
 
 ```bash
 python -m venv .venv
 ```
-
----
-
-# ▶️ Step 3: Activate Virtual Environment
 
 ### Windows
 
@@ -42,218 +26,134 @@ python -m venv .venv
 .venv\Scripts\activate
 ```
 
-### Linux/Mac
+### Linux / macOS
 
 ```bash
 source .venv/bin/activate
 ```
 
-After activation, you should see:
-
-```bash
-(.venv)
-```
-
-in the terminal.
-
 ---
 
-# 📦 Step 4: Install Dependencies
+# 3. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Verify installation:
+---
 
-```bash
-pip list
+# 4. Install PostgreSQL
+
+Download PostgreSQL
+
+https://www.postgresql.org/download/
+
+Create a database.
+
+Example:
+
+```
+attendance_db
 ```
 
 ---
 
-# 🗄️ Step 5: Setup PostgreSQL Database
+# 5. Update Database Credentials
 
-Open PostgreSQL and create a database:
+Open
 
-```sql
-CREATE DATABASE attendance_db;
+```
+backend/db.py
 ```
 
-Connect to the database:
-
-```sql
-\c attendance_db
-```
-
----
-
-# 📚 Step 6: Create Subjects Table
-
-```sql
-CREATE TABLE subjects(
-    id SERIAL PRIMARY KEY,
-    subject_name VARCHAR(100) NOT NULL,
-    subject_code VARCHAR(20) UNIQUE NOT NULL,
-    target_percentage INTEGER DEFAULT 75
-);
-```
-
----
-
-# 📅 Step 7: Create Attendance Table
-
-```sql
-CREATE TABLE attendance(
-    id SERIAL PRIMARY KEY,
-    subject_id INTEGER REFERENCES subjects(id)
-    ON DELETE CASCADE,
-    attendance_date DATE,
-    status VARCHAR(20)
-);
-```
-
----
-
-# ⚙️ Step 8: Configure Database Connection
-
-Open:
-
-```text
-db.py
-```
-
-Update your PostgreSQL credentials:
+Update:
 
 ```python
-import psycopg2
-
-def get_db_connection():
-
-    return psycopg2.connect(
-        host="localhost",
-        database="attendance_db",
-        user="postgres",
-        password="YOUR_PASSWORD"
-    )
+host="localhost"
+database="attendance_db"
+user="postgres"
+password="YOUR_PASSWORD"
+port="5432"
 ```
-
-Replace:
-
-```text
-YOUR_PASSWORD
-```
-
-with your PostgreSQL password.
 
 ---
 
-# 🚀 Step 9: Run the Application
+# 6. Create Tables
 
-Run:
+Run your SQL schema inside PostgreSQL.
+
+Tables required
+
+- users
+- subjects
+- attendance
+
+---
+
+# 7. Run Backend
 
 ```bash
+cd backend
+
 python app.py
 ```
 
-If successful, you should see:
+Backend runs at
+
+```
+http://127.0.0.1:5000
+```
+
+---
+
+# 8. Run Frontend
+
+Open another terminal
 
 ```bash
-* Running on http://127.0.0.1:5000
+cd frontend
+
+streamlit run app.py
+```
+
+Frontend runs at
+
+```
+http://localhost:8501
 ```
 
 ---
 
-# 🌐 Step 10: Open Browser
+# 9. Login
 
-Open:
+Register a new account.
 
-```text
-http://127.0.0.1:5000/frontend
+Add subjects.
+
+Mark attendance.
+
+Enjoy 🎉
+
+---
+
+# Folder Structure
+
+```
+backend/
+frontend/
+database/
+README.md
+SETUP.md
+requirements.txt
 ```
 
 ---
 
-# 🧪 Testing Routes
+# Tech Stack
 
-### Home Route
-
-```text
-http://127.0.0.1:5000/
-```
-
-Expected:
-
-```text
-Smart Attendance Calculator Backend Running
-```
-
-### Dashboard
-
-```text
-http://127.0.0.1:5000/frontend
-```
-
-### Test Insert
-
-```text
-http://127.0.0.1:5000/test
-```
-
----
-
-# 📁 Project Structure
-
-```text
-Smart-Class-Attendance-Calculator/
-
-├── routes/
-├── templates/
-├── static/
-├── tests/
-├── utils/
-│
-├── app.py
-├── db.py
-├── requirements.txt
-├── README.md
-├── SETUP.md
-└── .gitignore
-```
-
----
-
-# ❗ Common Errors
-
-### psycopg2 Error
-
-Install:
-
-```bash
-pip install psycopg2-binary
-```
-
----
-
-### Flask Not Found
-
-Install:
-
-```bash
-pip install flask
-```
-
----
-
-### Database Connection Error
-
-Check:
-
-- PostgreSQL service running
-- Database name
-- Username
-- Password
-- Port number
-
----
-
+- Python
+- Flask
+- Streamlit
+- PostgreSQL
+- Pandas
+- Plotly
