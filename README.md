@@ -1,147 +1,139 @@
-# 📚 Smart Class Attendance Calculator
+<div align="center">
 
-A smart and interactive web-based attendance management system built using **Python, Flask, PostgreSQL, HTML, CSS, and Jinja2**. This application helps students track attendance, calculate safe bunks, determine required classes to achieve attendance targets, and analyze attendance performance through detailed analytics.
+# 🎓 Smart Class Attendance Calculator
 
----
+### A Full-Stack Attendance Management System built with Python, Flask, Streamlit & PostgreSQL
 
-# 🚀 Features
+Track attendance • Manage subjects • Analyze performance • Calculate safe bunks • Multi-user support
 
-## 📘 Subject Management
-- ✅ Add New Subject
-- ✅ Edit Existing Subject
-- ✅ Delete Subject
-- ✅ Subject Validation
-- ✅ Subject Search Functionality
-- ✅ Subject Status Filtering
+![Python](https://img.shields.io/badge/Python-3.13-blue?style=for-the-badge&logo=python)
+![Flask](https://img.shields.io/badge/Flask-Backend-black?style=for-the-badge&logo=flask)
+![Streamlit](https://img.shields.io/badge/Streamlit-Frontend-red?style=for-the-badge&logo=streamlit)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-blue?style=for-the-badge&logo=postgresql)
+![REST API](https://img.shields.io/badge/REST-API-green?style=for-the-badge)
+![GitHub](https://img.shields.io/badge/Open%20Source-Project-success?style=for-the-badge)
 
----
-
-## 📅 Attendance Management
-- ✅ Mark Attendance as Present
-- ✅ Mark Attendance as Absent
-- ✅ View Attendance History
-- ✅ Edit Attendance Records
-- ✅ Delete Attendance Records
-- ✅ Recent Attendance Tracking
-- ✅ Subject-wise Attendance Management
+</div>
 
 ---
 
-## 📊 Attendance Analytics
+# 📖 Overview
 
-### Attendance Calculation
-- ✅ Total Classes Calculation
-- ✅ Attended Classes Calculation
-- ✅ Attendance Percentage Calculation
-- ✅ Overall Attendance Calculation
+Smart Class Attendance Calculator is a **full-stack attendance management system** developed for students to efficiently manage attendance records, monitor attendance percentage, calculate safe bunks, and visualize attendance statistics through an interactive dashboard.
 
-### Safe Bunk Analytics
-- ✅ Safe Bunks Calculator
-- ✅ Automatic Safe Bunk Prediction
-
-### Required Classes Analytics
-- ✅ Required Classes Calculator
-- ✅ Displays number of classes needed to achieve target attendance
-
-### Progress Analytics
-- ✅ Attendance Trend Analysis
-- ✅ Excellent Performance Detection
-- ✅ Improving Performance Detection
-- ✅ Average Performance Detection
-- ✅ Critical Attendance Detection
-
-### Warning System
-- ✅ Attendance Warning Detection
-- ✅ SAFE Status
-- ✅ WARNING Status
-- ✅ NO DATA Status
+The application follows a **REST API architecture** where the frontend is built using **Streamlit**, the backend uses **Flask**, and **PostgreSQL** stores all user, subject, and attendance information.
 
 ---
 
-# 📈 Dashboard Features
+# ✨ Features
 
-- ✅ Total Subjects Counter
-- ✅ Total Classes Counter
-- ✅ Overall Attendance Counter
-- ✅ Warning Subjects Counter
-- ✅ Subject Cards Dashboard
-- ✅ Attendance Progress Bars
-- ✅ Recent Attendance Table
-- ✅ Attendance Status Display
-- ✅ Safe Bunks Display
-- ✅ Required Classes Display
+## 🔐 Authentication
+
+- User Registration
+- Secure Login
+- Session Management
+- Logout
+- Multi-user Support
 
 ---
 
-# 🔎 Search & Filter Features
+## 📚 Subject Management
 
-- ✅ Search Subject by Name
-- ✅ Filter SAFE Subjects
-- ✅ Filter WARNING Subjects
-- ✅ Filter NO DATA Subjects
-- ✅ View All Subjects Filter
-
----
-
-# 📜 Attendance History Features
-
-- ✅ Subject Attendance History
-- ✅ Attendance Statistics
-- ✅ Present Classes Count
-- ✅ Absent Classes Count
-- ✅ Attendance Percentage
-- ✅ Progress Analytics
-- ✅ Delete Attendance Entry
-- ✅ Edit Attendance Entry
+- Add Subject
+- Edit Subject
+- Delete Subject
+- Subject Code Validation
+- Target Attendance Management
+- Duplicate Subject Detection
 
 ---
 
-# 🎨 Frontend Features
+## 📝 Attendance Management
 
-- ✅ Responsive Dashboard
-- ✅ Professional Card Layout
-- ✅ Progress Bars
-- ✅ Color-coded Status Indicators
-- ✅ Interactive Buttons
-- ✅ Summary Cards
-- ✅ Search Interface
-- ✅ Filter Interface
-- ✅ Attendance History UI
-
----
-
-# 🛠️ Backend Features
-
-- ✅ Flask Application
-- ✅ Modular Route Structure
-- ✅ PostgreSQL Database Integration
-- ✅ CRUD Operations
-- ✅ Database Relationships
-- ✅ Analytics Engine
-- ✅ Attendance Calculation Engine
-- ✅ Safe Bunk Algorithm
-- ✅ Required Classes Algorithm
+- Mark Attendance
+- Select Attendance Date
+- Present / Absent Status
+- Edit Attendance Record
+- Delete Attendance Record
+- Delete Confirmation
+- Attendance History
+- Attendance Filters
+- Live Attendance Summary
 
 ---
 
-# 💻 Tech Stack
+## 📊 Dashboard
 
-## Backend
-- Python
-- Flask
+- Total Subjects
+- Overall Attendance
+- Present Classes
+- Absent Classes
+- Safe Bunks
+- Warning Subjects
+- Recent Attendance Activity
+- Subject Overview
+- Progress Bar
+- Attendance Distribution
 
-## Database
-- PostgreSQL
+---
 
-## Frontend
-- HTML5
-- CSS3
-- Jinja2 Templates
+## 📈 Analytics
 
-## Development Tools
-- Visual Studio Code
-- Git
-- GitHub
+- Overall Attendance Analysis
+- Subject-wise Performance
+- Attendance Distribution
+- Attendance Trends
+- Performance Insights
+
+---
+
+## 👤 Profile
+
+- User Information
+- Attendance Statistics
+- Account Details
+
+---
+
+# 🏗️ System Architecture
+
+```text
+                Streamlit Frontend
+                        │
+                        │ HTTP Requests
+                        ▼
+                Flask REST API
+                        │
+                        ▼
+                 PostgreSQL Database
+```
+
+---
+
+# 🗄️ Database Design
+
+```text
+Users
+│
+├──────── Subjects
+│             │
+│             └──────── Attendance
+```
+
+---
+
+# 🛠️ Tech Stack
+
+| Category | Technology |
+|----------|------------|
+| Frontend | Streamlit |
+| Backend | Flask |
+| Database | PostgreSQL |
+| Language | Python |
+| Charts | Plotly |
+| Data Processing | Pandas |
+| Database Driver | Psycopg2 |
+| API Communication | Requests |
 
 ---
 
@@ -150,50 +142,43 @@ A smart and interactive web-based attendance management system built using **Pyt
 ```text
 Smart-Class-Attendance-Calculator/
 
-├── routes/
-│   ├── __init__.py
-│   ├── subjects.py
-│   ├── attendance.py
-│   └── analytics.py
 │
-├── templates/
-│   ├── index.html
-│   └── history.html
+├── backend/
+│   │
+│   ├── app.py
+│   ├── db.py
+│   ├── routes/
+│   ├── api_routes/
+│   └── requirements.txt
 │
-├── static/
-│   └── css/
-│       └── style.css
+├── frontend/
+│   │
+│   ├── app.py
+│   ├── pages/
+│   ├── components/
+│   ├── data/
+│   └── assets/
 │
-├── tests/
-│   └── test_db.py
+├── database/
 │
-├── utils/
-│   └── calculator.py
-│
-├── screenshots/
-│
-├── app.py
-├── db.py
-├── requirements.txt
 ├── README.md
+├── requirements.txt
 └── .gitignore
 ```
 
 ---
 
-# ⚙️ Installation
+# 🚀 Getting Started
 
 ## Clone Repository
 
 ```bash
-git clone https://github.com/yourusername/Smart-Class-Attendance-Calculator.git
-```
+git clone https://github.com/YOUR_USERNAME/Smart-Class-Attendance-Calculator.git
 
-## Enter Project Folder
-
-```bash
 cd Smart-Class-Attendance-Calculator
 ```
+
+---
 
 ## Create Virtual Environment
 
@@ -201,11 +186,19 @@ cd Smart-Class-Attendance-Calculator
 python -m venv .venv
 ```
 
-## Activate Virtual Environment
+### Windows
 
 ```bash
 .venv\Scripts\activate
 ```
+
+### Linux / macOS
+
+```bash
+source .venv/bin/activate
+```
+
+---
 
 ## Install Dependencies
 
@@ -213,26 +206,142 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-## Run Application
+---
 
-```bash
-python app.py
+## Configure PostgreSQL
+
+Create a PostgreSQL database.
+
+Update your database credentials inside:
+
+```text
+backend/db.py
 ```
-
-# 🔮 Future Enhancements
-
-- Attendance Charts
-- Graph Analytics
-- CSV Export
-- PDF Export
-- User Authentication
-- Email Notifications
-- Dark Mode
-- Mobile Responsive Design
-- Cloud Deployment
 
 ---
 
-# 👨‍💻 Author
+## Start Backend
 
-**SHREYANSH KUMAR**
+```bash
+cd backend
+
+python app.py
+```
+
+---
+
+## Start Frontend
+
+Open another terminal.
+
+```bash
+cd frontend
+
+streamlit run app.py
+```
+
+---
+
+# 📷 Application Screenshots
+
+> Replace these with your screenshots.
+
+| Login | Dashboard |
+|-------|-----------|
+| ![](assets/login.png) | ![](assets/dashboard.png) |
+
+| Subjects | Attendance |
+|----------|------------|
+| ![](assets/subjects.png) | ![](assets/attendance.png) |
+
+| Analytics | Profile |
+|-----------|---------|
+| ![](assets/analytics.png) | ![](assets/profile.png) |
+
+---
+
+# 🎯 Project Highlights
+
+- REST API Based Architecture
+- PostgreSQL Database Integration
+- Multi-user Support
+- Secure Authentication
+- Attendance Tracking
+- Subject Management
+- Attendance Analytics
+- Dashboard Visualization
+- Safe Bunks Calculator
+- Warning Detection
+- Interactive Charts
+- CRUD Operations
+
+---
+
+# 💻 Skills Demonstrated
+
+- Python Programming
+- Flask Development
+- Streamlit Development
+- PostgreSQL
+- SQL
+- REST APIs
+- CRUD Operations
+- Database Design
+- Data Visualization
+- Dashboard Development
+- Git
+- GitHub
+
+---
+
+# 🔮 Future Enhancements
+
+- Email-based Password Reset
+- Email Notifications
+- CSV / Excel Export
+- Calendar View
+- Mobile Responsive UI
+- Admin Panel
+- Cloud Deployment
+- Docker Support
+
+---
+
+# 🤝 Contributing
+
+Contributions are welcome.
+
+1. Fork the repository
+2. Create a new branch
+3. Commit your changes
+4. Push your branch
+5. Create a Pull Request
+
+---
+
+# 📄 License
+
+This project is developed for educational and learning purposes.
+
+---
+
+# 👨‍💻 Developer
+
+**Shreyansh Kumar**
+
+B.Tech Computer Science & Engineering
+
+Lovely Professional University
+
+GitHub:
+https://github.com/YOUR_USERNAME
+
+---
+
+<div align="center">
+
+### ⭐ If you found this project useful, don't forget to star the repository!
+
+Made with ❤️ using Python, Flask, Streamlit & PostgreSQL
+
+</div>

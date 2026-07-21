@@ -1,4 +1,6 @@
 from routes.api_routes import register_api_routes
+import os
+from werkzeug.utils import secure_filename
 from flask import Flask, render_template
 from flask_login import (
     LoginManager,
@@ -26,7 +28,31 @@ app = Flask(__name__)
 
 app.config["SECRET_KEY"] = "24e5840c13e7c782810b4862797a8fc6"
 
+# =====================================
+# FILE UPLOAD CONFIG
+# =====================================
 
+app.config["UPLOAD_FOLDER"] = os.path.join(
+
+    app.root_path,
+
+    "static",
+
+    "profile_pictures"
+
+)
+
+app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024
+
+ALLOWED_EXTENSIONS = {
+
+    "png",
+
+    "jpg",
+
+    "jpeg"
+
+}
 # =====================================
 # BCRYPT
 # =====================================

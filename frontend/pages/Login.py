@@ -1,26 +1,56 @@
+import time
 import streamlit as st
 import requests
 
+# =====================================
+# PAGE CONFIG
+# =====================================
+
 st.set_page_config(
+
     page_title="Login",
+
     page_icon="🔐",
+
     layout="centered"
+
 )
+
+# =====================================
+# PAGE TITLE
+# =====================================
 
 st.title("🔐 Login")
 
-st.caption("Sign in to Smart Class Attendance Planner")
+st.caption("Sign in to Smart Attendance Planner")
+
+# =====================================
+# LOGIN FORM
+# =====================================
+
+login_error = None
 
 with st.form("login_form"):
 
-    email = st.text_input("Email")
+    email = st.text_input(
 
-    password = st.text_input(
-        "Password",
-        type="password"
+        "Email"
+
     )
 
-    submitted = st.form_submit_button("Login")
+    password = st.text_input(
+
+        "Password",
+
+        type="password"
+
+    )
+
+    submitted = st.form_submit_button(
+
+        "Login"
+
+    )
 
     if submitted:
 
@@ -43,10 +73,10 @@ with st.form("login_form"):
             data = response.json()
 
             st.session_state["logged_in"] = True
+
             st.session_state["user"] = data["user"]
 
             st.success("Login Successful ✅")
-            import time
 
             time.sleep(1)
 
@@ -54,4 +84,38 @@ with st.form("login_form"):
 
         else:
 
-            st.error(response.json()["message"])
+            login_error = response.json()["message"]
+
+# =====================================
+# ERROR MESSAGE
+# =====================================
+
+if login_error:
+
+    st.error(login_error)
+
+    if login_error == "Invalid Email":
+
+        st.info(
+
+            "Account not found. Please register first."
+
+        )
+
+# =====================================
+# REGISTER SECTION
+# =====================================
+
+st.divider()
+
+st.write("Don't have an account?")
+
+if st.button(
+
+    "📝 Register Here",
+
+    use_container_width=True
+
+):
+
+    st.switch_page("pages/Register.py")

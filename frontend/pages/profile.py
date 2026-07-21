@@ -1,4 +1,51 @@
 import streamlit as st
+import requests
+
+# =====================================
+# LOGIN CHECK
+# =====================================
+
+if "logged_in" not in st.session_state:
+
+    st.warning("Please login first.")
+
+    st.switch_page("pages/Login.py")
+
+# =====================================
+# FETCH PROFILE
+# =====================================
+
+profile_response = requests.get(
+
+    "http://127.0.0.1:5000/api/profile",
+
+    params={
+
+        "user_id": st.session_state["user"]["id"]
+
+    }
+
+)
+
+profile = profile_response.json()
+
+# =====================================
+# FETCH ANALYTICS
+# =====================================
+
+analytics_response = requests.get(
+
+    "http://127.0.0.1:5000/api/analytics",
+
+    params={
+
+        "user_id": st.session_state["user"]["id"]
+
+    }
+
+)
+
+analytics = analytics_response.json()
 
 # =====================================
 # PAGE TITLE
@@ -18,20 +65,203 @@ col1, col2 = st.columns([1, 3])
 
 with col1:
 
-    st.image(
-        "https://api.dicebear.com/7.x/initials/png?seed=Student",
-        width=140
+    image_name = profile.get("image_file")
+
+    if not image_name:
+
+        image_name = "default.jpg"
+
+    image_url = (
+
+        "http://127.0.0.1:5000/static/profile_pictures/"
+
+        + image_name
+
     )
+
+    st.image(
+
+        image_url,
+
+        width=150
+
+    )
+
+    uploaded_image = st.file_uploader(
+
+        "Choose Profile Picture",
+
+        type=[
+
+            "png",
+
+            "jpg",
+
+            "jpeg"
+
+        ]
+
+    )
+
+    if uploaded_image is not None:
+
+        st.image(
+
+            uploaded_image,
+
+            caption="Preview",
+
+            width=150
+
+        )
+
+        upload_col, remove_col = st.columns(2)
+
+        with upload_col:
+
+            if st.button(
+
+                "📤 Upload",
+
+                use_container_width=True
+
+            ):
+
+                files = {
+
+                    "image": (
+
+                        uploaded_image.name,
+
+                        uploaded_image,
+
+                        uploaded_image.type
+
+                    )
+
+                }
+
+                response = requests.post(
+
+                    "http://127.0.0.1:5000/api/profile/upload",
+
+                    data={
+
+                        "user_id": profile["id"]
+
+                    },
+
+                    files=files
+
+                )
+
+                if response.status_code == 200:
+
+                    st.success(
+
+                        response.json()["message"]
+
+                    )
+
+                    st.rerun()
+
+                else:
+
+                    st.error(
+
+                        f"Upload Failed ({response.status_code})"
+
+                    )
+
+                    st.code(
+
+                        response.text
+
+                    )
+
+        with remove_col:
+
+            if profile["image_file"] != "default.jpg":
+
+                if st.button(
+
+                    "🗑 Remove",
+
+                    use_container_width=True,
+
+                    type="secondary"
+
+                ):
+
+                    response = requests.post(
+
+                        "http://127.0.0.1:5000/api/profile/remove",
+
+                        json={
+
+                            "user_id": profile["id"]
+
+                        }
+
+                    )
+
+                    if response.status_code == 200:
+
+                        st.success(
+
+                            response.json()["message"]
+
+                        )
+
+                        st.rerun()
+
+                    else:
+
+                        st.error(
+
+                            response.json()["message"]
+
+                        )
+
+            else:
+
+                st.button(
+
+                    "🗑 Remove",
+
+                    disabled=True,
+
+                    use_container_width=True,
+
+                    type="secondary"
+
+                )
 
 with col2:
 
-    st.subheader("Shreyansh")
+    st.subheader(
 
-    st.write("📧 demo@gmail.com")
+        profile["username"]
 
-    st.write("🎓 Computer Science Student")
+    )
 
-    st.write("🏫 Lovely Professional University")
+    st.write(
+
+        f"📧 {profile['email']}"
+
+    )
+
+    st.write(
+
+        f"🆔 User ID : {profile['id']}"
+
+    )
+
+    st.write(
+
+        "🎓 Smart Attendance Planner User"
+
+    )
 
 # =====================================
 # ACCOUNT STATISTICS
@@ -49,7 +279,7 @@ with col1:
 
         "📚 Subjects",
 
-        6
+        analytics["total_subjects"]
 
     )
 
@@ -59,7 +289,7 @@ with col2:
 
         "📈 Attendance",
 
-        "82%"
+        f"{analytics['overall_attendance']}%"
 
     )
 
@@ -67,9 +297,9 @@ with col3:
 
     st.metric(
 
-        "😴 Safe Bunks",
+        "🟢 Safe Subjects",
 
-        4
+        analytics["safe_subjects"]
 
     )
 
@@ -77,9 +307,9 @@ with col4:
 
     st.metric(
 
-        "⚠ Warnings",
+        "⚠️ Warning Subjects",
 
-        1
+        analytics["warning_subjects"]
 
     )
 
@@ -89,52 +319,138 @@ with col4:
 
 st.divider()
 
-st.subheader("⚙ Account Settings")
+st.subheader("⚙️ Account Settings")
 
-change_password = st.button(
-    "🔒 Change Password"
-)
+col1, col2 = st.columns(2)
 
-logout = st.button(
-    "🚪 Logout"
-)
+with col1:
 
-if change_password:
+    if st.button(
 
-    st.info(
-        "Password feature will be connected with Flask backend."
+    "🔒 Change Password",
+
+    use_container_width=True
+
+):
+
+        st.session_state["show_change_password"] = True
+
+    if st.session_state.get("show_change_password", False):
+
+        st.divider()
+
+        st.subheader("🔒 Change Password")
+
+        current_password = st.text_input(
+
+        "Current Password",
+
+        type="password",
+
+        key="current_password"
+
     )
 
-if logout:
+    new_password = st.text_input(
 
-    st.success(
-        "Logout feature will be connected with Flask backend."
+        "New Password",
+
+        type="password",
+
+        key="new_password"
+
     )
 
+    confirm_password = st.text_input(
+
+        "Confirm New Password",
+
+        type="password",
+
+        key="confirm_password"
+
+    )
+
+    if st.button(
+
+        "✅ Update Password",
+
+        use_container_width=True
+
+    ):
+
+        response = requests.post(
+
+            "http://127.0.0.1:5000/api/profile/change-password",
+
+            json={
+
+                "user_id": profile["id"],
+
+                "current_password": current_password,
+
+                "new_password": new_password,
+
+                "confirm_password": confirm_password
+
+            }
+
+        )
+
+        data = response.json()
+
+        if response.status_code == 200:
+
+            st.success(
+
+                data["message"]
+
+            )
+
+            st.session_state["show_change_password"] = False
+
+        else:
+
+            st.error(
+
+                data["message"]
+
+            )
+
+with col2:
+
+    if st.button(
+
+    "🚪 Logout",
+
+    use_container_width=True,
+
+    type="secondary"
+
+):
+
+        st.session_state.clear()
+
+        st.switch_page("pages/Login.py")
 # =====================================
 # ABOUT
 # =====================================
 
 st.divider()
 
-st.subheader("ℹ About")
+st.subheader("ℹ️ About")
 
 st.info(
-
-    """
-Smart Class Attendance Planner
+"""
+Smart Attendance Planner
 
 Version : 1.0
 
 Developed using:
-
 • Streamlit
-
 • Flask
-
 • PostgreSQL
-
 • Python
-    """
+"""
 
 )
