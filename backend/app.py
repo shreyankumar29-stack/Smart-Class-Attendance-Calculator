@@ -1,3 +1,4 @@
+from routes.api_routes import register_api_routes
 import os
 from werkzeug.utils import secure_filename
 from flask import Flask, render_template
@@ -25,7 +26,10 @@ from routes.analytics import register_analytics_routes
 
 app = Flask(__name__)
 
-app.config["SECRET_KEY"] = "24e5840c13e7c782810b4862797a8fc6"
+app.config["SECRET_KEY"] = os.getenv(
+    "SECRET_KEY",
+    "24e5840c13e7c782810b4862797a8fc6"
+)
 
 # =====================================
 # FILE UPLOAD CONFIG
@@ -91,6 +95,8 @@ register_auth_routes(app)
 register_subject_routes(app)
 
 register_attendance_routes(app)
+
+register_api_routes(app) 
 
 register_analytics_routes(app)
 
@@ -388,5 +394,7 @@ def test():
 if __name__ == "__main__":
 
     app.run(
-        debug=True
+        host="0.0.0.0",
+        port=int(os.getenv("PORT", 5000)),
+        debug=False
     )
