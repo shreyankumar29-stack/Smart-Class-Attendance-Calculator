@@ -136,4 +136,18 @@ This is the first stable release of the **Smart Class Attendance Calculator**.
 - Requirements File
 - GitHub Ready Project Structure
 
---- 
+---
+
+## 🚀 Upcoming (v1.1)
+
+### Planned Features
+
+- Google Sign-In (OAuth)
+- GitHub Sign-In (OAuth)
+- Forgot Password (Email OTP)
+- CSV/Excel Export
+- Calendar View
+- Email Notifications
+- Docker Support
+- Cloud Deployment
+- Mobile Responsive UI
