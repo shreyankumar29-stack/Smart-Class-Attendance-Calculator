@@ -1,4 +1,3 @@
-from routes.api_routes import register_api_routes
 import os
 from werkzeug.utils import secure_filename
 from flask import Flask, render_template
@@ -95,7 +94,7 @@ register_attendance_routes(app)
 
 register_analytics_routes(app)
 
-register_api_routes(app)
+
 # =====================================
 # FRONTEND DASHBOARD
 # =====================================
