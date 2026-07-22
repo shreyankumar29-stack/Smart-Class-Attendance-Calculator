@@ -33,6 +33,7 @@ st.divider()
 
 st.subheader("➕ Add New Subject")
 
+
 with st.form("add_subject_form"):
 
     subject_name = st.text_input(
@@ -108,31 +109,62 @@ response = requests.get(
 
 subjects = pd.DataFrame(response.json())
 
-subjects.rename(
+# =====================================
+# EMPTY DATAFRAME HANDLING
+# =====================================
 
-    columns={
+if subjects.empty:
 
-        "subject_name": "Subject",
+    subjects = pd.DataFrame(
 
-        "subject_code": "Code",
+        columns=[
 
-        "target_percentage": "Target",
+            "id",
 
-        "status": "Status"
+            "Subject",
 
-    },
+            "Code",
 
-    inplace=True
+            "Target",
 
-)
+            "Status"
 
+        ]
 
+    )
+
+else:
+
+    subjects.rename(
+
+        columns={
+
+            "subject_name": "Subject",
+
+            "subject_code": "Code",
+
+            "target_percentage": "Target",
+
+            "status": "Status"
+
+        },
+
+        inplace=True
+
+    )
 
 # =====================================
 # SUBJECTS
 # =====================================
 
 st.subheader("📋 Your Subjects")
+# =====================================
+# EMPTY SUBJECTS MESSAGE
+# =====================================
+
+if subjects.empty:
+
+    st.info("📚 No subjects found. Add your first subject to get started.")
 
 
 # =====================================
@@ -273,21 +305,28 @@ if st.session_state.edit_subject is not None:
 # SUMMARY CALCULATIONS
 # =====================================
 
-safe_subjects = len(
+if subjects.empty:
 
-    subjects[
-        subjects["Status"] == "✅ Safe"
-    ]
+    safe_subjects = 0
+    warning_subjects = 0
 
-)
+else:
 
-warning_subjects = len(
+    safe_subjects = len(
 
-    subjects[
-        subjects["Status"] == "⚠️ Warning"
-    ]
+        subjects[
+            subjects["Status"] == "✅ Safe"
+        ]
 
-)
+    )
+
+    warning_subjects = len(
+
+        subjects[
+            subjects["Status"] == "⚠️ Warning"
+        ]
+
+    )
 # =====================================
 # SUMMARY
 # =====================================
