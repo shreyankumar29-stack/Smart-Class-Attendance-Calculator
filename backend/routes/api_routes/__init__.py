@@ -5,8 +5,8 @@ from .attendance_api import register_attendance_api
 from .analytics_api import register_analytics_api
 from .profile_api import register_profile_api
 from .register_api import register_register_api
-def register_api_routes(app):
 
+def register_api_routes(app):
     register_login_api(app)
     register_dashboard_api(app)
     register_subjects_api(app)
