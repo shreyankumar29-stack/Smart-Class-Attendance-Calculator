@@ -84,7 +84,10 @@ with st.form("login_form"):
 
         else:
 
-            login_error = response.json()["message"]
+            st.write("Status Code:", response.status_code)
+            st.write("Content-Type:", response.headers.get("Content-Type"))
+            st.code(response.text)
+            st.stop()
 
 # =====================================
 # ERROR MESSAGE
